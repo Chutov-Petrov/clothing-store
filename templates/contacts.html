@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Контакты — Ткань{% endblock %}
+{% block content %}
+
+<nav class="breadcrumbs">
+  <a href="{{ url_for('catalog.home') }}">Главная</a>
+  <span class="sep">/</span>
+  <span class="current">Контакты</span>
+</nav>
+
+<h1>Контакты</h1>
+
+<div class="panel" style="margin-top:20px;max-width:760px">
+  <table>
+    <tr>
+      <th style="width:180px">📞 Телефон</th>
+      <td><a href="tel:+78001234567" style="color:var(--acc)"><b>8 800 123-45-67</b></a>
+        <br><span class="cat">Бесплатно по России, ежедневно 10:00–20:00</span></td>
+    </tr>
+    <tr>
+      <th>✉️ Email</th>
+      <td><a href="mailto:info@tkan.ru" style="color:var(--acc)"><b>info@tkan.ru</b></a>
+        <br><span class="cat">Ответим в течение 1 рабочего дня</span></td>
+    </tr>
+    <tr>
+      <th>📍 Адрес</th>
+      <td><b>101000, Москва, ул. Тканевая, д. 12</b>
+        <br><span class="cat">Магазин и пункт самовывоза</span></td>
+    </tr>
+    <tr>
+      <th>🕐 Режим работы</th>
+      <td><b>Ежедневно 10:00–20:00</b>
+        <br><span class="cat">Без перерывов и выходных</span></td>
+    </tr>
+    <tr>
+      <th>💬 Мессенджеры</th>
+      <td>
+        <a href="#" style="color:var(--acc)">Telegram</a> ·
+        <a href="#" style="color:var(--acc)">ВКонтакте</a> ·
+        <a href="#" style="color:var(--acc)">WhatsApp</a>
+      </td>
+    </tr>
+  </table>
+</div>
+
+{% endblock %}

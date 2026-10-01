@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}429 — Слишком много запросов{% endblock %}
+{% block content %}
+<div class="panel narrow" style="text-align:center">
+  <h2 style="font-size:20px;margin-bottom:12px">429 — Слишком много запросов</h2>
+  <p class="cat" style="margin-bottom:16px">Попробуйте ещё раз через 15 минут.</p>
+  <a class="btn p" href="{{ url_for('catalog.home') }}">На главную</a>
+</div>
+{% endblock %}

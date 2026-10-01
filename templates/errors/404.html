@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}404 — Не найдено{% endblock %}
+{% block content %}
+<div class="panel narrow" style="text-align:center">
+  <h2 style="font-size:20px;margin-bottom:12px">404 — Страница не найдена</h2>
+  <p class="cat" style="margin-bottom:16px">Возможно, ссылка устарела или товар удалён.</p>
+  <a class="btn p" href="{{ url_for('catalog.home') }}">На главную</a>
+</div>
+{% endblock %}

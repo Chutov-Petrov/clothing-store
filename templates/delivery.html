@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Доставка — Ткань{% endblock %}
+{% block content %}
+
+<nav class="breadcrumbs">
+  <a href="{{ url_for('catalog.home') }}">Главная</a>
+  <span class="sep">/</span>
+  <span class="current">Доставка</span>
+</nav>
+
+<h1>Доставка</h1>
+
+<div class="panel" style="margin-top:20px;max-width:760px">
+  <h3 style="font-size:18px">Способы доставки</h3>
+
+  <table style="margin-top:14px">
+    <tr>
+      <th>Способ</th><th>Срок</th><th>Стоимость</th>
+    </tr>
+    <tr>
+      <td><b>Курьером по Москве</b></td>
+      <td>1 день</td>
+      <td>300 ₽, бесплатно от 5 000 ₽</td>
+    </tr>
+    <tr>
+      <td><b>Курьером по России</b></td>
+      <td>3–7 дней</td>
+      <td>500 ₽, бесплатно от 10 000 ₽</td>
+    </tr>
+    <tr>
+      <td><b>Почтой России</b></td>
+      <td>5–14 дней</td>
+      <td>250 ₽</td>
+    </tr>
+    <tr>
+      <td><b>Самовывоз из магазина</b></td>
+      <td>В день заказа</td>
+      <td>Бесплатно</td>
+    </tr>
+  </table>
+
+  <h3 style="margin-top:24px;font-size:18px">Как это работает</h3>
+  <ol style="margin-top:10px;line-height:1.9">
+    <li>Оформляете заказ на сайте</li>
+    <li>Менеджер звонит в течение 30 минут для подтверждения</li>
+    <li>Собираем заказ и передаём в службу доставки</li>
+    <li>Получаете SMS с номером трекинга</li>
+    <li>Забираете заказ — или встречаете курьера дома</li>
+  </ol>
+</div>
+
+{% endblock %}

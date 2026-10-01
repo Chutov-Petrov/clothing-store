@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf }}">
+  <title>{% block title %}Ткань — магазин одежды{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=9">
+</head>
+<body>
+<header><div class="wrap">
+  <a class="logo" href="{{ url_for('catalog.home') }}">ТКАНЬ</a>
+  <nav>
+    <a href="{{ url_for('catalog.home') }}" class="{{ 'on' if request.endpoint == 'home' }}">Главная</a>
+    <a href="{{ url_for('catalog.shop') }}" class="{{ 'on' if request.endpoint in ('shop','product') }}">Каталог</a>
+    {% if user %}
+      <a href="{{ url_for('wishlist.wishlist') }}" class="{{ 'on' if request.endpoint == 'wishlist' }}">Избранное{% if wishlist_count %} ({{ wishlist_count }}){% endif %}</a>
+      <a href="{{ url_for('auth.profile') }}" class="{{ 'on' if request.endpoint == 'profile' }}">Профиль</a>
+    {% endif %}
+    {% if is_admin %}
+      <a href="{{ url_for('admin.admin') }}" class="{{ 'on' if request.path.startswith('/admin') }}">Админка</a>
+    {% endif %}
+  </nav>
+  <a class="btn" href="{{ url_for('cart.cart') }}">Корзина ({{ cart_count }})</a>
+
+  {% if user %}
+    <span class="cat" style="margin-left:12px">{{ user.name }}</span>
+    <form class="inline" method="post" action="{{ url_for('auth.account_logout') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="btn s">Выйти</button>
+    </form>
+  {% endif %}
+
+  {% if is_admin and not user %}
+    <span class="cat" style="margin-left:12px">Режим админа</span>
+    <form class="inline" method="post" action="{{ url_for('admin.logout') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="btn s">Выйти из админки</button>
+    </form>
+  {% endif %}
+
+  {% if not user and not is_admin %}
+    <a class="btn s" href="{{ url_for('auth.account_login') }}">Войти</a>
+    <a class="btn s p" href="{{ url_for('auth.register') }}">Регистрация</a>
+  {% endif %}
+</div></header>
+
+<main><div class="wrap">
+  {% for m in get_flashed_messages() %}<div class="flash" role="status">{{ m }}</div>{% endfor %}
+  {% block content %}{% endblock %}
+</div></main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-col">
+      <a class="footer-logo" href="{{ url_for('catalog.home') }}">ТКАНЬ</a>
+      <p class="footer-desc">Одежда на каждый день из хороших тканей. Работаем с 2020 года, доставляем по всей России.</p>
+      <div class="footer-socials">
+        <a href="#" aria-label="Telegram" title="Telegram">✈️</a>
+        <a href="#" aria-label="ВКонтакте" title="ВКонтакте">💬</a>
+        <a href="#" aria-label="WhatsApp" title="WhatsApp">📱</a>
+        <a href="#" aria-label="Instagram" title="Instagram">📷</a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4>Покупателям</h4>
+      <ul>
+        <li><a href="{{ url_for('pages.delivery') }}">Доставка</a></li>
+        <li><a href="{{ url_for('pages.payment') }}">Оплата</a></li>
+        <li><a href="{{ url_for('pages.delivery') }}">Возврат и обмен</a></li>
+        <li><a href="{{ url_for('pages.payment') }}">Размерная сетка</a></li>
+        <li><a href="{{ url_for('pages.about') }}">Отзывы</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>О магазине</h4>
+      <ul>
+        <li><a href="{{ url_for('pages.about') }}">О нас</a></li>
+        <li><a href="{{ url_for('pages.contacts') }}">Вакансии</a></li>
+        <li><a href="{{ url_for('pages.about') }}">Оптовым клиентам</a></li>
+        <li><a href="{{ url_for('pages.about') }}">Партнёрам</a></li>
+        <li><a href="{{ url_for('pages.contacts') }}">Контакты</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Контакты</h4>
+      <ul class="footer-contacts">
+        <li>📞 <a href="tel:+78001234567">8 800 123-45-67</a></li>
+        <li>✉️ <a href="mailto:info@tkan.ru">info@tkan.ru</a></li>
+        <li>📍 Москва, ул. Тканевая, 12</li>
+        <li>🕐 Ежедневно 10:00–20:00</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="wrap footer-bottom">
+    <span>© 2026 Ткань. Все права защищены.</span>
+    <span><a href="{{ url_for('pages.about') }}">Политика конфиденциальности</a> · <a href="{{ url_for('pages.about') }}">Публичная оферта</a></span>
+  </div>
+</footer>
+</body></html>

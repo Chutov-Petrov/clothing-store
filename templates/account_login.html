@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Вход — Ткань{% endblock %}
+{% block content %}
+<div class="panel narrow">
+  <h2 style="font-size:20px">Вход на сайт</h2>
+  <p class="cat" style="margin-bottom:14px">Для покупателей и сотрудников</p>
+
+  <form class="form" method="post">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Email (для покупателей) или логин <b>admin</b>
+      <input name="email" type="text" required autofocus placeholder="ivan@mail.ru или admin">
+    </label>
+    <label>Пароль
+      <input name="password" type="password" required placeholder="••••••••">
+    </label>
+    <button class="btn p">Войти</button>
+  </form>
+
+  <p class="cat" style="margin-top:14px">
+    Нет аккаунта? <a href="{{ url_for('auth.register') }}"><u>Зарегистрироваться</u></a>
+  </p>
+</div>
+{% endblock %}

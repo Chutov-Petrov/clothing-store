@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Ткань — магазин одежды{% endblock %}
+{% block content %}
+
+<section class="hero-banner">
+  <div class="hero-banner-content">
+    <span class="hero-badge">Новая коллекция 2026</span>
+    <h1>Одежда на каждый день</h1>
+    <p>Простые вещи из хороших тканей. Бесплатная доставка от 5 000 ₽.</p>
+    <div class="hero-actions">
+      <a class="btn p big" href="{{ url_for('catalog.shop') }}">Перейти в каталог →</a>
+      <a class="btn big" href="{{ url_for('catalog.shop', cat='Верхняя одежда') }}">Верхняя одежда</a>
+    </div>
+  </div>
+  <div class="hero-banner-art">🧥</div>
+</section>
+
+<section class="home-section">
+  <h2 class="home-title">Категории</h2>
+  <div class="cat-grid">
+    {% for c in CATS %}
+      <a href="{{ url_for('catalog.shop', cat=c) }}" class="cat-tile">
+        <span class="cat-tile-emoji">{{ EM[c] }}</span>
+        <span class="cat-tile-name">{{ c }}</span>
+        <span class="cat-tile-count">{{ cat_counts[c] }} товаров</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% if hits %}
+<section class="home-section">
+  <div class="home-title-row">
+    <h2 class="home-title">Хиты продаж</h2>
+    <a href="{{ url_for('catalog.shop') }}" class="home-more">Все товары →</a>
+  </div>
+  <div class="grid">
+    {% for p in hits %}
+    <article class="card">
+      <a href="{{ url_for('catalog.product', pid=p.id) }}" class="card-link">
+        <div class="card-media" style="background:{{ p.color }}">
+          {% if p.main_image %}
+            <img class="card-img" src="{{ url_for('static', filename='uploads/' + p.main_image) }}" alt="{{ p.name }}">
+          {% else %}
+            <span class="big-emoji">{{ EM.get(p.cat, '👚') }}</span>
+          {% endif %}
+          {% if p.tag %}<span class="tag tag-{{ p.tag }}">{{ TAGS[p.tag] }}</span>{% endif %}
+        </div>
+      </a>
+      <button class="heart {{ 'on' if p.in_wishlist }}" data-id="{{ p.id }}" type="button">
+        {{ '♥' if p.in_wishlist else '♡' }}
+      </button>
+      <div class="cb">
+        <span class="cat">{{ p.cat }}</span>
+        <a href="{{ url_for('catalog.product', pid=p.id) }}" class="name">{{ p.name }}</a>
+        <span class="price">{{ '{:,}'.format(p.price).replace(',', ' ') }} ₽</span>
+        <form class="row" method="post" action="{{ url_for('cart.add_to_cart') }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ p.id }}">
+          <select name="size" aria-label="Размер">{% for s in p.sizes.split(',') %}<option>{{ s.strip() }}</option>{% endfor %}</select>
+          <button class="btn p">В корзину</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if new_items %}
+<section class="home-section">
+  <div class="home-title-row">
+    <h2 class="home-title">Новинки</h2>
+    <a href="{{ url_for('catalog.shop') }}" class="home-more">Все →</a>
+  </div>
+  <div class="grid">
+    {% for p in new_items %}
+    <article class="card">
+      <a href="{{ url_for('catalog.product', pid=p.id) }}" class="card-link">
+        <div class="card-media" style="background:{{ p.color }}">
+          {% if p.main_image %}
+            <img class="card-img" src="{{ url_for('static', filename='uploads/' + p.main_image) }}" alt="{{ p.name }}">
+          {% else %}
+            <span class="big-emoji">{{ EM.get(p.cat, '👚') }}</span>
+          {% endif %}
+          {% if p.tag %}<span class="tag tag-{{ p.tag }}">{{ TAGS[p.tag] }}</span>{% endif %}
+        </div>
+      </a>
+      <button class="heart {{ 'on' if p.in_wishlist }}" data-id="{{ p.id }}" type="button">
+        {{ '♥' if p.in_wishlist else '♡' }}
+      </button>
+      <div class="cb">
+        <span class="cat">{{ p.cat }}</span>
+        <a href="{{ url_for('catalog.product', pid=p.id) }}" class="name">{{ p.name }}</a>
+        <span class="price">{{ '{:,}'.format(p.price).replace(',', ' ') }} ₽</span>
+        <form class="row" method="post" action="{{ url_for('cart.add_to_cart') }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ p.id }}">
+          <select name="size" aria-label="Размер">{% for s in p.sizes.split(',') %}<option>{{ s.strip() }}</option>{% endfor %}</select>
+          <button class="btn p">В корзину</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="home-section">
+  <div class="features">
+    <div class="feature">
+      <span class="feat-icon">🚚</span>
+      <b>Быстрая доставка</b>
+      <span>От 1 дня по городу</span>
+    </div>
+    <div class="feature">
+      <span class="feat-icon">💳</span>
+      <b>Удобная оплата</b>
+      <span>Карта, наличные, рассрочка</span>
+    </div>
+    <div class="feature">
+      <span class="feat-icon">🔄</span>
+      <b>Возврат 14 дней</b>
+      <span>Без вопросов и объяснений</span>
+    </div>
+    <div class="feature">
+      <span class="feat-icon">⭐</span>
+      <b>5000+ клиентов</b>
+      <span>Довольные покупатели</span>
+    </div>
+  </div>
+</section>
+
+<script src="{{ url_for('static', filename='wishlist.js') }}"></script>
+{% endblock %}

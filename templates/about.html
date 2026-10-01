@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}О магазине — Ткань{% endblock %}
+{% block content %}
+
+<nav class="breadcrumbs">
+  <a href="{{ url_for('catalog.home') }}">Главная</a>
+  <span class="sep">/</span>
+  <span class="current">О магазине</span>
+</nav>
+
+<h1>О магазине «Ткань»</h1>
+
+<div class="panel" style="margin-top:20px;max-width:760px">
+  <p style="line-height:1.7">
+    <b>Ткань</b> — это магазин одежды на каждый день. Мы работаем с 2020 года
+    и за это время одели более 5000 покупателей по всей России.
+  </p>
+  <p style="line-height:1.7;margin-top:14px">
+    Наша цель — простые вещи из хороших тканей по честным ценам.
+    Мы лично проверяем качество каждой партии и следим за тем,
+    чтобы вам было удобно и приятно носить наши вещи.
+  </p>
+
+  <h3 style="margin-top:24px;font-size:18px">Наши принципы</h3>
+  <ul style="margin-top:10px;line-height:1.9">
+    <li>✅ Только натуральные и проверенные ткани</li>
+    <li>✅ Честные цены без накруток</li>
+    <li>✅ Быстрая доставка по всей стране</li>
+    <li>✅ Возврат и обмен без вопросов в течение 14 дней</li>
+    <li>✅ Забота о каждом клиенте</li>
+  </ul>
+
+  <h3 style="margin-top:24px;font-size:18px">Реквизиты</h3>
+  <p class="cat" style="line-height:1.9;margin-top:10px">
+    ООО «Ткань» · ИНН 7700000000 · ОГРН 1207700000000<br>
+    Юридический адрес: 101000, Москва, ул. Тканевая, д. 12
+  </p>
+</div>
+
+{% endblock %}

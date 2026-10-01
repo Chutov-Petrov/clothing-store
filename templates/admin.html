@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Админка — Ткань{% endblock %}
+{% block content %}
+{% if stats %}
+<div class="stats">
+  <div class="stat"><b>{{ stats.products }}</b><span>товаров</span></div>
+  <div class="stat"><b>{{ stats.orders }}</b><span>заказов</span></div>
+  <div class="stat"><b>{{ '{:,}'.format(stats.revenue).replace(',', ' ') }} ₽</b><span>выручка</span></div>
+  <div class="stat"><b>{{ stats.new }}</b><span>новых заказов</span></div>
+</div>
+{% endif %}
+
+<div class="bar" style="margin-top:0">
+  <a class="chip {{ 'on' if tab == 'products' }}" href="{{ url_for('admin.admin') }}">Товары</a>
+  <a class="chip {{ 'on' if tab == 'orders' }}" href="{{ url_for('admin.admin_orders') }}">Заказы</a>
+  <a class="chip {{ 'on' if tab == 'reviews' }}" href="{{ url_for('admin.admin_reviews') }}">Отзывы</a>
+  <a class="chip {{ 'on' if tab == 'promos' }}" href="{{ url_for('admin.admin_promos') }}">Промокоды</a>
+  <a class="chip {{ 'on' if tab == 'logins' }}" href="{{ url_for('admin.admin_logins') }}">Журнал входов</a>
+  <form method="post" action="{{ url_for('admin.logout') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn s">Выйти</button></form>
+</div>
+
+<div class="panel">
+{% if tab == 'products' %}
+  {% if edit %}
+  <h3 style="font-size:17px">{{ 'Редактирование товара' if edit['id'] else 'Новый товар' }}</h3>
+  <form method="post" action="{{ url_for('admin.product_save') }}" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ edit['id'] }}">
+    <div class="fg">
+      <label>Название<input name="name" value="{{ edit['name'] }}" required></label>
+      <label>Категория<select name="cat">{% for c in CATS %}<option {{ 'selected' if c == edit['cat'] }}>{{ c }}</option>{% endfor %}</select></label>
+      <label>Цена, ₽<input name="price" type="number" min="1" value="{{ edit['price'] }}" required></label>
+      <label>Остаток<input name="stock" type="number" min="0" value="{{ edit['stock'] or 0 }}"></label>
+      <label>Размеры через запятую<input name="sizes" value="{{ edit['sizes'] }}" required></label>
+      <label>Тег<select name="tag">
+        <option value="" {{ 'selected' if not edit['tag'] }}>Без тега</option>
+        {% for k, v in TAGS.items() %}<option value="{{ k }}" {{ 'selected' if k == edit['tag'] }}>{{ v }}</option>{% endfor %}
+      </select></label>
+      <label>Цвет заглушки<input name="color" type="color" value="{{ edit['color'] }}"></label>
+      <label>Материал<input name="material" value="{{ edit['material'] }}" placeholder="Хлопок 100%"></label>
+      <label>Уход<input name="care" value="{{ edit['care'] }}" placeholder="Стирка 30°"></label>
+    </div>
+    <label style="display:block;margin:10px 0">Фото (несколько, до 6, jpg/png/webp)
+      <input name="images" type="file" accept="image/*" multiple style="margin-top:4px">
+    </label>
+    {% if edit_gallery %}
+      <p class="cat">Текущие фото ({{ edit_gallery|length }}):</p>
+      <div class="admin-gallery">
+        {% for img in edit_gallery %}
+          <div class="admin-thumb">
+            <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="">
+            <form method="post" action="{{ url_for('admin.product_image_delete', pid=edit['id'], img_id=img.id) }}">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button class="btn s d" title="Удалить фото">×</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <button class="btn p" style="margin-top:14px">Сохранить товар</button>
+    <a class="btn" href="{{ url_for('admin.admin') }}" style="margin-top:14px">Отмена</a>
+  </form>
+  {% else %}<a class="btn p" href="{{ url_for('admin.admin', new=1) }}">Добавить товар</a>{% endif %}
+
+  <table style="margin-top:16px">
+    <tr><th>Фото</th><th>Название</th><th>Категория</th><th>Цена</th><th>Остаток</th><th>Тег</th><th></th></tr>
+    {% for p in products %}
+    <tr>
+      <td>{% if p.main_image %}<img src="{{ url_for('static', filename='uploads/' + p.main_image) }}" style="width:44px;height:44px;object-fit:cover;border-radius:8px">{% else %}<span style="font-size:26px">{{ EM.get(p.cat,'👚') }}</span>{% endif %}</td>
+      <td>{{ p.name }}</td>
+      <td>{{ p.cat }}</td>
+      <td>{{ '{:,}'.format(p.price).replace(',', ' ') }} ₽</td>
+      <td>{{ p.stock }}</td>
+      <td>{% if p.tag %}<span class="tag tag-{{ p.tag }}" style="position:static">{{ TAGS[p.tag] }}</span>{% endif %}</td>
+      <td style="white-space:nowrap">
+        <a class="btn s" href="{{ url_for('admin.admin', edit=p.id) }}">Изменить</a>
+        <form class="inline" method="post" action="{{ url_for('admin.product_delete', pid=p.id) }}" onsubmit="return confirm('Удалить товар?')">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn s d">Удалить</button></form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+
+{% elif tab == 'orders' %}
+  {% if orders %}
+  <table>
+    <tr><th>№</th><th>Дата</th><th>Покупатель</th><th>Состав</th><th>Сумма</th><th>Промо</th><th>Статус</th></tr>
+    {% for o in orders %}
+    <tr><td>{{ o.id }}</td><td>{{ o.created[:10] }}</td>
+      <td>{{ o.name }}<br><span class="cat">{{ o.phone }}{% if o.user_email %} · {{ o.user_email }}{% endif %}</span></td>
+    <td>{% for i in items[o.id] %}{{ i.name }} ({{ i.size }}) × {{ i.qty }}<br>{% endfor %}</td>
+    <td>
+      {{ '{:,}'.format(o.total).replace(',', ' ') }} ₽
+      {% if o.discount %}
+        <br><span class="cat" style="color:var(--bad)">−{{ '{:,}'.format(o.discount).replace(',', ' ') }} ₽</span>
+      {% endif %}
+    </td>
+    <td>{% if o.promo_code %}<span class="tag tag-new" style="position:static">{{ o.promo_code }}</span>{% else %}—{% endif %}</td>
+    <td><form method="post" action="{{ url_for('admin.order_status', oid=o.id) }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <select name="status" aria-label="Статус" onchange="this.form.submit()">{% for s in STATUSES %}<option {{ 'selected' if s == o.status }}>{{ s }}</option>{% endfor %}</select>
+    </form></td></tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="empty">Заказов пока нет.</p>{% endif %}
+
+{% elif tab == 'reviews' %}
+  {% if reviews %}
+  <table>
+    <tr><th>№</th><th>Товар</th><th>Автор</th><th>Оценка</th><th>Текст</th><th>Дата</th><th></th></tr>
+    {% for r in reviews %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{% if r.product_id %}<a href="{{ url_for('catalog.product', pid=r.product_id) }}">{{ r.product_name or '—' }}</a>{% else %}—{% endif %}</td>
+      <td>{{ r.user_name or '—' }}<br><span class="cat">{{ r.user_email or '' }}</span></td>
+      <td class="review-stars">{% for i in range(5) %}{{ '★' if i < r.rating else '☆' }}{% endfor %}</td>
+      <td style="max-width:340px">{{ r.text or '—' }}</td>
+      <td>{{ r.created[:10] }}</td>
+      <td>
+        <form method="post" action="{{ url_for('admin.review_delete', rid=r.id) }}" onsubmit="return confirm('Удалить отзыв?')">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn s d">Удалить</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="empty">Отзывов пока нет.</p>{% endif %}
+
+{% elif tab == 'promos' %}
+  <h3 style="font-size:17px;margin-bottom:14px">Новый промокод</h3>
+  <form method="post" action="{{ url_for('admin.promo_save') }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="fg">
+      <label>Код<input name="code" placeholder="WELCOME10" required style="text-transform:uppercase"></label>
+      <label>Скидка, %<input name="percent" type="number" min="0" max="90" value="0"></label>
+      <label>Скидка, ₽<input name="fixed" type="number" min="0" value="0"></label>
+      <label>Мин. сумма, ₽<input name="min_sum" type="number" min="0" value="0"></label>
+      <label>Макс. использований<input name="max_uses" type="number" min="0" value="0" title="0 = без ограничений"></label>
+    </div>
+    <button class="btn p">Создать промокод</button>
+  </form>
+
+  <table style="margin-top:20px">
+    <tr><th>Код</th><th>Скидка</th><th>Мин. сумма</th><th>Использовано</th><th>Активен</th><th></th></tr>
+    {% for pr in promos %}
+    <tr>
+      <td><b>{{ pr.code }}</b></td>
+      <td>
+        {% if pr.discount_percent %}{{ pr.discount_percent }}%{% endif %}
+        {% if pr.discount_percent and pr.discount_fixed %}+{% endif %}
+        {% if pr.discount_fixed %}{{ pr.discount_fixed }} ₽{% endif %}
+      </td>
+      <td>{{ '{:,}'.format(pr.min_sum).replace(',', ' ') }} ₽</td>
+      <td>
+        {{ pr.used_count }}
+        {% if pr.max_uses %}/ {{ pr.max_uses }}{% endif %}
+      </td>
+      <td>
+        {% if pr.active %}<span style="color:#10B981;font-weight:700">Да</span>
+        {% else %}<span style="color:var(--bad);font-weight:700">Нет</span>{% endif %}
+      </td>
+      <td style="white-space:nowrap">
+        <form class="inline" method="post" action="{{ url_for('admin.promo_toggle', pid=pr.id) }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn s">{{ 'Выключить' if pr.active else 'Включить' }}</button>
+        </form>
+        <form class="inline" method="post" action="{{ url_for('admin.promo_delete', pid=pr.id) }}" onsubmit="return confirm('Удалить промокод?')">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn s d">Удалить</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+
+{% else %}
+  {# ===== Журнал входов ===== #}
+  {% if logs %}
+  <p class="cat" style="margin-bottom:12px">Последние 300 попыток входа. Обновляется автоматически.</p>
+  <table>
+    <tr><th>Дата</th><th>IP</th><th>Логин</th><th>Роль</th><th>Результат</th><th>Браузер</th></tr>
+    {% for l in logs %}
+    <tr>
+      <td style="white-space:nowrap">{{ l.created[:19] }}</td>
+      <td><code>{{ l.ip }}</code></td>
+      <td>{{ l.login }}</td>
+      <td>
+        {% if l.role == 'admin' %}<span class="tag tag-hit" style="position:static">Админ</span>
+        {% elif l.role == 'admin_logout' %}<span class="tag" style="position:static;background:#666">Выход админа</span>
+        {% elif l.role == 'customer_logout' %}<span class="tag" style="position:static;background:#666">Выход</span>
+        {% elif l.role == 'blocked' %}<span class="tag" style="position:static;background:#C8324B">Заблокирован</span>
+        {% else %}<span class="tag tag-new" style="position:static">Покупатель</span>{% endif %}
+      </td>
+      <td>
+        {% if l.success %}<span style="color:#10B981;font-weight:700">✓ Успех</span>
+        {% else %}<span style="color:var(--bad);font-weight:700">✗ Отказ</span>{% endif %}
+      </td>
+      <td style="max-width:340px;font-size:12px;color:var(--mut)">{{ l.user_agent[:80] }}{% if l.user_agent|length > 80 %}…{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="empty">Журнал пока пуст. Попробуйте войти/выйти — записи появятся здесь.</p>
+  {% endif %}
+{% endif %}
+</div>
+{% endblock %}

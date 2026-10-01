@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Регистрация — Ткань{% endblock %}
+{% block content %}
+<div class="panel narrow">
+  <h2 style="font-size:20px">Регистрация</h2>
+  <form class="form" method="post">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Email<input name="email" type="email" required autofocus></label>
+    <label>Имя<input name="name" required></label>
+    <label>Телефон<input name="phone" type="tel" placeholder="+7 ..."></label>
+    <label>Пароль (мин. 8 символов, заглавная, строчная, цифра)<input name="password" type="password" required minlength="8"></label>
+    <label>Повторите пароль<input name="password2" type="password" required minlength="8"></label>
+    <button class="btn p">Создать аккаунт</button>
+  </form>
+  <p class="cat" style="margin-top:12px">Уже с нами? <a href="{{ url_for('auth.account_login') }}"><u>Войти</u></a></p>
+</div>
+{% endblock %}

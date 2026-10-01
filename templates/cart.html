@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Корзина — Ткань{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+  <a href="{{ url_for('catalog.home') }}">Главная</a>
+  <span class="sep">/</span>
+  <span class="current">Корзина</span>
+</nav>
+<div class="cart-head">
+  <h2>Корзина</h2>
+  {% if items %}
+    <form method="post" action="{{ url_for('cart.clear_cart') }}" onsubmit="return confirm('Очистить корзину?')">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="btn s d">Очистить</button>
+    </form>
+  {% endif %}
+</div>
+
+<div class="panel">
+{% if items %}
+  {% for i in items %}
+  <div class="ci">
+    <a class="th" href="{{ url_for('catalog.product', pid=i.p.id) }}" style="background:{{ i.p.color }};overflow:hidden">
+      {% if i.img %}
+        <img src="{{ url_for('static', filename='uploads/' + i.img) }}" alt="{{ i.p.name }}">
+      {% else %}
+        {{ EM.get(i.p.cat, '👚') }}
+      {% endif %}
+    </a>
+    <div class="in">
+      <a href="{{ url_for('catalog.product', pid=i.p.id) }}"><b>{{ i.p.name }}</b></a><br>
+      <span class="cat">Размер {{ i.size }} · {{ '{:,}'.format(i.p.price).replace(',', ' ') }} ₽</span>
+    </div>
+    <form method="post" action="{{ url_for('cart.change_qty') }}" class="qty">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="key" value="{{ i.key }}">
+      <button class="btn s" name="d" value="-" aria-label="Меньше">−</button>
+      <span class="q">{{ i.qty }}</span>
+      <button class="btn s" name="d" value="+" aria-label="Больше">+</button>
+    </form>
+    <form method="post" action="{{ url_for('cart.remove_item') }}" class="rm">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="key" value="{{ i.key }}">
+      <button class="btn s d" title="Удалить">×</button>
+    </form>
+  </div>
+  {% endfor %}
+
+  <div class="promo-block">
+    {% if promo %}
+      <div class="promo-applied">
+        <span>🎟 Промокод <b>{{ promo.code }}</b> применён</span>
+        <form method="post" action="{{ url_for('cart.clear_promo') }}" class="inline">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn s d">Убрать</button>
+        </form>
+      </div>
+    {% else %}
+      <form method="post" action="{{ url_for('cart.apply_promo') }}" class="promo-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input name="code" placeholder="Промокод (например, WELCOME10)" style="text-transform:uppercase">
+        <button class="btn">Применить</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="totals">
+    <div class="tot-line"><span>Товары</span><span>{{ '{:,}'.format(subtotal).replace(',', ' ') }} ₽</span></div>
+    {% if discount %}
+      <div class="tot-line discount"><span>Скидка по промокоду</span><span>−{{ '{:,}'.format(discount).replace(',', ' ') }} ₽</span></div>
+    {% endif %}
+    <div class="tot-line grand"><span>Итого</span><span>{{ '{:,}'.format(total).replace(',', ' ') }} ₽</span></div>
+  </div>
+
+  <form class="form" method="post" action="{{ url_for('cart.checkout') }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input name="name" placeholder="Ваше имя" aria-label="Имя" required
+           value="{{ user.name if user else '' }}">
+    <input name="phone" type="tel" placeholder="Телефон" aria-label="Телефон" required
+           value="{{ user.phone if user else '' }}">
+    <button class="btn p">Оформить заказ</button>
+  </form>
+  {% if not user %}
+    <p class="cat" style="margin-top:8px">Есть <a href="{{ url_for('auth.account_login') }}"><u>аккаунт</u></a>? Войдите — заказы сохранятся в профиле.</p>
+  {% endif %}
+{% else %}
+  <p class="empty">В корзине пока пусто. Добавьте товар из <a href="{{ url_for('catalog.shop') }}"><u>каталога</u></a>.</p>
+{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}{{ p.name }} — Ткань{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+  <a href="{{ url_for('catalog.home') }}">Главная</a>
+  <span class="sep">/</span>
+  <a href="{{ url_for('catalog.shop') }}">Каталог</a>
+  <span class="sep">/</span>
+  <span class="current">{{ p.name }}</span>
+</nav>
+<div class="product-page">
+  <div class="product-media">
+    <div class="gallery-main" style="background:{{ p.color }}">
+      {% if main_img %}
+        <img id="main-image" src="{{ url_for('static', filename='uploads/' + main_img) }}" alt="{{ p.name }}">
+      {% else %}
+        <span class="big-emoji">{{ EM.get(p.cat, '👚') }}</span>
+      {% endif %}
+      {% if p.tag %}<span class="tag tag-{{ p.tag }}">{{ TAGS[p.tag] }}</span>{% endif %}
+      <button class="heart big {{ 'on' if in_wish }}" data-id="{{ p.id }}" type="button"
+              title="{{ 'Убрать из избранного' if in_wish else 'В избранное' }}">
+        {{ '♥' if in_wish else '♡' }}
+      </button>
+    </div>
+    {% if gallery and gallery|length > 1 %}
+    <div class="gallery-thumbs">
+      {% for img in gallery %}
+        <button type="button" class="thumb-item {{ 'on' if loop.first }}"
+                data-full="{{ url_for('static', filename='uploads/' + img.filename) }}">
+          <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="">
+        </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="product-info">
+    <span class="cat">{{ p.cat }}</span>
+    <h1>{{ p.name }}</h1>
+
+    {% if stats.cnt > 0 %}
+      {% set full = stats.avg|round(0, 'floor')|int %}
+      <p class="rating big">
+        <span class="stars">{% for i in range(5) %}{{ '★' if i < full else '☆' }}{% endfor %}</span>
+        <span class="rating-num">{{ '%.1f' % stats.avg }}</span>
+        <a href="#reviews" class="rating-cnt">{{ stats.cnt }} отзыв{{ 'ов' if stats.cnt >= 5 else '' }}</a>
+      </p>
+    {% else %}
+      <p class="rating big muted">Ещё нет отзывов</p>
+    {% endif %}
+
+    <div class="price big">{{ '{:,}'.format(p.price).replace(',', ' ') }} ₽</div>
+
+    {% if p.stock is not none and p.stock > 0 %}
+      <p class="stock {{ 'low' if p.stock <= 5 else '' }}">В наличии: {{ p.stock }} шт.</p>
+    {% else %}
+      <p class="stock low">Нет в наличии</p>
+    {% endif %}
+
+    <p class="desc">Хорошая вещь из базового гардероба. Плотная ткань, аккуратные швы, посадка на каждый день.</p>
+
+    <form class="form" method="post" action="{{ url_for('cart.add_to_cart') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="id" value="{{ p.id }}">
+      <label>Размер
+        <select name="size">
+          {% for s in p.sizes.split(',') %}<option>{{ s.strip() }}</option>{% endfor %}
+        </select>
+      </label>
+      <button class="btn p" {% if p.stock is not none and p.stock <= 0 %}disabled{% endif %}>Добавить в корзину</button>
+    </form>
+    <a class="btn" href="{{ url_for('catalog.shop') }}" style="margin-top:8px">← Вернуться в каталог</a>
+
+    {% if p.material or p.care %}
+    <h3 class="specs-title">Характеристики</h3>
+    <table class="specs">
+      {% if p.material %}<tr><th>Материал</th><td>{{ p.material }}</td></tr>{% endif %}
+      {% if p.care %}<tr><th>Уход</th><td>{{ p.care }}</td></tr>{% endif %}
+      <tr><th>Размеры</th><td>{{ p.sizes }}</td></tr>
+      <tr><th>Категория</th><td>{{ p.cat }}</td></tr>
+    </table>
+    {% endif %}
+  </div>
+</div>
+
+{# ===== Блок отзывов ===== #}
+<div class="reviews-block" id="reviews">
+  <h3 class="reviews-title">Отзывы {% if stats.cnt %}({{ stats.cnt }}){% endif %}</h3>
+
+  {% if user_reviewed %}
+    <p class="cat">Вы уже оставили отзыв на этот товар. Спасибо!</p>
+  {% elif user %}
+    <form class="form review-form" method="post" action="{{ url_for('catalog.add_review', pid=p.id) }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>Оценка
+        <select name="rating" required>
+          <option value="5">★★★★★ — Отлично</option>
+          <option value="4">★★★★ — Хорошо</option>
+          <option value="3">★★★ — Нормально</option>
+          <option value="2">★★ — Плохо</option>
+          <option value="1">★ — Ужасно</option>
+        </select>
+      </label>
+      <label>Комментарий
+        <textarea name="text" rows="3" maxlength="1000" placeholder="Поделитесь впечатлениями..."></textarea>
+      </label>
+      <button class="btn p">Отправить отзыв</button>
+    </form>
+  {% else %}
+    <p class="cat"><a href="{{ url_for('auth.account_login') }}"><u>Войдите</u></a>, чтобы оставить отзыв.</p>
+  {% endif %}
+
+  {% if reviews %}
+    <div class="reviews-list">
+      {% for r in reviews %}
+        <div class="review">
+          <div class="review-head">
+            <b>{{ r.user_name or 'Покупатель' }}</b>
+            <span class="review-stars">
+              {%- for i in range(5) -%}
+                {{ '★' if i < r.rating else '☆' }}
+              {%- endfor -%}
+            </span>
+            <span class="review-date">{{ r.created[:10] }}</span>
+          </div>
+          {% if r.text %}<p class="review-text">{{ r.text }}</p>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty">Пока никто не оставил отзыв. Будьте первым!</p>
+  {% endif %}
+</div>
+
+<script src="{{ url_for('static', filename='wishlist.js') }}"></script>
+
+{% if gallery and gallery|length > 1 %}
+<script>
+  document.querySelectorAll('.thumb-item').forEach(function (t) {
+    t.addEventListener('click', function () {
+      document.getElementById('main-image').src = t.dataset.full;
+      document.querySelectorAll('.thumb-item').forEach(function (x) { x.classList.remove('on'); });
+      t.classList.add('on');
+    });
+  });
+</script>
+{% endif %}
+
+{% if related %}
+<h3 style="margin-top:40px;font-size:18px">Похожие товары</h3>
+<div class="grid" style="margin-top:12px">
+  {% for r in related %}
+  <a class="card" href="{{ url_for('catalog.product', pid=r.id) }}">
+    <div class="card-media" style="background:{{ r.color }}">
+      {% if r.main_image %}
+        <img class="card-img" src="{{ url_for('static', filename='uploads/' + r.main_image) }}" alt="{{ r.name }}">
+      {% else %}
+        <span class="big-emoji">{{ EM.get(r.cat, '👚') }}</span>
+      {% endif %}
+      {% if r.tag %}<span class="tag tag-{{ r.tag }}">{{ TAGS[r.tag] }}</span>{% endif %}
+    </div>
+    <div class="cb"><span class="cat">{{ r.cat }}</span><span class="name">{{ r.name }}</span>
+      <span class="price">{{ '{:,}'.format(r.price).replace(',', ' ') }} ₽</span></div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

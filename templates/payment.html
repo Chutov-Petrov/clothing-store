@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Оплата — Ткань{% endblock %}
+{% block content %}
+
+<nav class="breadcrumbs">
+  <a href="{{ url_for('catalog.home') }}">Главная</a>
+  <span class="sep">/</span>
+  <span class="current">Оплата</span>
+</nav>
+
+<h1>Оплата</h1>
+
+<div class="panel" style="margin-top:20px;max-width:760px">
+  <h3 style="font-size:18px">Способы оплаты</h3>
+  <ul style="margin-top:10px;line-height:1.9">
+    <li>💳 <b>Банковской картой онлайн</b> — Visa, MasterCard, МИР</li>
+    <li>💵 <b>Наличными при получении</b> курьеру или в магазине</li>
+    <li>📱 <b>СБП</b> — Система быстрых платежей</li>
+    <li>🎁 <b>Подарочным сертификатом</b> — укажите код в корзине</li>
+  </ul>
+
+  <h3 style="margin-top:24px;font-size:18px">Промокоды и скидки</h3>
+  <p style="line-height:1.7;margin-top:10px">
+    Введите промокод в корзине — скидка применится автоматически.
+    Промокод нельзя применить повторно, у каждого кода есть
+    срок действия и минимальная сумма заказа.
+  </p>
+
+  <h3 style="margin-top:24px;font-size:18px">Возврат средств</h3>
+  <p style="line-height:1.7;margin-top:10px">
+    При отмене заказа возврат производится тем же способом,
+    которым была произведена оплата. Срок зачисления —
+    3–10 рабочих дней в зависимости от банка.
+  </p>
+</div>
+
+{% endblock %}
