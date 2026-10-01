@@ -4,13 +4,6 @@
 
 ### Интернет-магазин одежды на Python + Flask
 
-[![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-3.0.3-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
-[![License](https://img.shields.io/badge/License-Educational-blue?style=for-the-badge)](#-лицензия)
-[![Tests](https://img.shields.io/badge/Tests-25%20passed-brightgreen?style=for-the-badge)](#-тесты)
-[![OWASP](https://img.shields.io/badge/OWASP-Top%2010%3A2025-red?style=for-the-badge)](https://owasp.org/Top10/)
-
 **Полноценный интернет-магазин с клиентской и административной частью.**
 Каталог · Корзина · Промокоды · Избранное · Отзывы · Админка · Журнал входов.
 
@@ -26,22 +19,16 @@
 
 ## 📸 Скриншоты
 
-<div align="center">
 
 ### 🏠 Главная страница
-![Главная](docs/home.png)
 
 ### 🛍 Каталог с фильтрами
-![Каталог](docs/catalog.png)
 
 ### 👕 Карточка товара
-![Товар](docs/product.png)
 
 ### 🛒 Корзина с промокодами
-![Корзина](docs/cart.png)
 
 ### ⚙️ Админка
-![Админка](docs/admin.png)
 
 </div>
 
